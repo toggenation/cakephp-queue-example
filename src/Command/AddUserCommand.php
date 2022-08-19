@@ -47,29 +47,42 @@ class AddUserCommand extends Command
      */
     public function execute(Arguments $args, ConsoleIo $io)
     {
+        $this->io = $io;
+
         if ($args->getOption('random')) {
-            $data = (new UserFactory())->single();
+            $this->io->info(['', 'Adding a user with Faker data'], 2);
 
-            $name = $data['name'];
-
-            $email = $data['email'];
+            extract((new UserFactory())->single());
         } else {
-            $io->info(['', 'Enter details or CTRL C to exit'], 2);
-            do {
-                $name = $args->getArgument('name') ?? $io->ask('Enter a full name e.g. James McDonald');
-            } while (empty($name));
-            do {
-                $email = $args->getArgument('email') ?? $io->ask('Enter an email address e.g. james@toggen.com.au');
-            } while (empty($email));
+            $name = $args->getArgument('name');
+
+            $email = $args->getArgument('email');
+
+            if ($name === null || $email === null) {
+                $this->io->info(["", "Enter details or Control C to exit", ""]);
+
+                $name = $this->ask($name, 'Full name e.g. James McDonald');
+
+                $email = $this->ask($email, 'Email address e.g. james@toggen.com.au');
+            }
         }
-
-
-
 
         QueueManager::push(
             AddUserJob::class,
             compact('email', 'name'),
             ['config' => 'add_user']
         );
+    }
+    public function ask($current, $message)
+    {
+        if (!empty($current)) {
+            return $current;
+        }
+
+        do {
+            $result =  $this->io->ask($message);
+        } while (empty($result));
+
+        return $result;
     }
 }
