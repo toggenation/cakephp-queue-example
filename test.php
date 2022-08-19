@@ -1,8 +1,15 @@
 <?php
 
-function pr($val)
-{
-    echo print_r($val, true) . PHP_EOL;
+if (!function_exists('p')) {
+    /**
+     * print_r for james
+     * @param mixed $val 
+     * @return void 
+     */
+    function pt($val)
+    {
+        echo print_r($val, true) . PHP_EOL;
+    }
 }
 
 $data = [
@@ -13,14 +20,14 @@ $data = [
 // $data = array_values($data);
 // $data[] = "This is an error string";
 
-pr(array_values($data)[] = "This is the end");
+pt(array_values($data)[] = "This is the end");
 
 
 
 
 $callable = function (...$args) {
-    pr($args[0]);
-    pr(func_get_args(), true);
+    pt($args[0]);
+    pt(func_get_args(), true);
 };
 
 $callable('a', 'b', 'c');
