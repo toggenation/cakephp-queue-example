@@ -8,14 +8,14 @@ use Cake\Command\Command;
 use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
-use Cake\Mailer\MailerAwareTrait;
+use Cake\Mailer\Mailer;
 
 /**
  * EmailTest command.
  */
 class EmailTestCommand extends Command
 {
-    use MailerAwareTrait;
+
     /**
      * Hook method for defining this command's option parser.
      *
@@ -39,6 +39,11 @@ class EmailTestCommand extends Command
      */
     public function execute(Arguments $args, ConsoleIo $io)
     {
-        $this->getMailer('Test')->send('test', ['test@example.com', 'Test User Name here']);
+        (new Mailer())->setTo(['test@example.com' => 'Test User Name here'])
+            ->setSubject('Hi this is a test')
+            ->setEmailFormat('html')
+            ->deliver("This is the content");
+
+        $io->out("Message sent!");
     }
 }

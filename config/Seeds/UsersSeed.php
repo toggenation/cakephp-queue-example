@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Factories\UserFactory;
 use Migrations\AbstractSeed;
 
 /**
@@ -21,18 +22,7 @@ class UsersSeed extends AbstractSeed
      */
     public function run()
     {
-
-        $faker = Faker\Factory::create();
-
-        for ($i = 0; $i < 20; $i++) {
-            $fn = $faker->firstName();
-            $ln = $faker->lastName();
-            $dn = $faker->domainName();
-            $data[] = [
-                'name' => "{$fn} {$ln}",
-                'email' => strtolower("{$fn}.{$ln}@{$dn}")
-            ];
-        }
+        $data = (new UserFactory())->make(20);
 
         $table = $this->table('users');
 

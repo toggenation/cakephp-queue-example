@@ -10,6 +10,7 @@ use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
 use Cake\Queue\QueueManager;
 use App\Job\AddUserJob;
+use App\Factories\UserFactory;
 
 /**
  * AddUser command.
@@ -28,9 +29,13 @@ class AddUserCommand extends Command
         $parser = parent::buildOptionParser($parser);
 
         return $parser->addArguments([
-            'name' => ['required' => true, 'help' => "Enter a user full name e.g. \"James McDonald\""],
-            'email' => ['required' => true, 'help' => "Enter a user email e.g. \"james@toggen.com.au\""],
-        ])->setDescription(['', 'Add a user to the database using the add_user queue']);
+            'name' => ['required' => false, 'help' => "Enter a user full name e.g. \"James McDonald\""],
+            'email' => ['required' => false, 'help' => "Enter a user email e.g. \"james@toggen.com.au\""],
+        ])->addOption('random', [
+            'help' => "Generate a random user using Faker",
+            'short' => 'r', 'boolean' => true
+        ])
+            ->setEpilog(['', 'Add a user to the database using the add_user queue']);
     }
 
     /**
@@ -42,7 +47,24 @@ class AddUserCommand extends Command
      */
     public function execute(Arguments $args, ConsoleIo $io)
     {
-        [$name, $email] = $args->getArguments();
+        if ($args->getOption('random')) {
+            $data = (new UserFactory())->single();
+
+            $name = $data['name'];
+
+            $email = $data['email'];
+        } else {
+            $io->info(['', 'Enter details or CTRL C to exit'], 2);
+            do {
+                $name = $args->getArgument('name') ?? $io->ask('Enter a full name e.g. James McDonald');
+            } while (empty($name));
+            do {
+                $email = $args->getArgument('email') ?? $io->ask('Enter an email address e.g. james@toggen.com.au');
+            } while (empty($email));
+        }
+
+
+
 
         QueueManager::push(
             AddUserJob::class,

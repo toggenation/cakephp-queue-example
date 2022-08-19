@@ -2,6 +2,7 @@
 
 namespace App\Listener;
 
+use Cake\Event\Event;
 use Cake\Event\EventListenerInterface;
 use Cake\Log\LogTrait;
 use Psr\Log\LogLevel;
@@ -64,9 +65,11 @@ class AddUserWorkerListener implements EventListenerInterface
         // $this->log(__METHOD__);
     }
 
-    public function processorMessageReject($message)
+    public function processorMessageReject(Event $message)
     {
-        // $this->log(__METHOD__);
+        $this->log("Add failed " . implode(' - ', array_values($message->getData('message')->getArgument())));
+
+        $this->log(__METHOD__);
     }
 
     public function processorMessageSuccess($message)
@@ -77,7 +80,7 @@ class AddUserWorkerListener implements EventListenerInterface
          * @var \Cake\Queue\Job\Message $cakeMessage
          */
         $cakeMessage = $message->getData('message');
-
+        $this->log('Added ' . implode(', ', $cakeMessage->getArgument()), LogLevel::NOTICE);
         // $this->log($cakeMessage->getArgument()['args'][0], LogLevel::INFO);
     }
 

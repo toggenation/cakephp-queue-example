@@ -4,6 +4,7 @@ namespace App\Listener;
 
 use Cake\Event\EventListenerInterface;
 use Cake\Log\LogTrait;
+use Cake\Utility\Text;
 use Psr\Log\LogLevel;
 
 class WorkerListener implements EventListenerInterface
@@ -77,7 +78,9 @@ class WorkerListener implements EventListenerInterface
          */
         $cakeMessage = $message->getData('message');
 
-        $this->log($cakeMessage->getArgument()['args'][0], LogLevel::INFO);
+        $text = implode(' - ', $cakeMessage->getArgument()['args']);
+
+        $this->log($text, LogLevel::INFO);
     }
 
     public function processorMessageFailure($message)
