@@ -1,0 +1,30 @@
+# Settings for docker-compose.yaml
+# Copy this file to .env
+
+# Ports published on docker host
+# change these to not collide
+# with your other docker containers
+FORWARD_DB_PORT=5088
+FORWARD_NGINX_PORT=6088
+FORWARD_REDIS_PORT=7088
+FORWARD_MAILHOG_DASHBOARD_PORT=8088
+FORWARD_MAILHOG_PORT=9088
+
+# MySQL 
+# DB_PASSWORD is also root password
+DB_CONNECTION=mysql
+DB_HOST=mysql
+DB_PORT=3306
+DB_DATABASE=devtest
+DB_USERNAME=devtest
+DB_PASSWORD=devtest
+
+# MAIL_MAILER=smtp
+# MAIL_HOST=mailhog
+# MAIL_PORT=1025
+# MAIL_USERNAME=null
+# MAIL_PASSWORD=null
+# MAIL_ENCRYPTION=null
+# MAIL_FROM_ADDRESS=james@toggen.com.au
+# MAIL_FROM_NAME="${APP_NAME}"
+

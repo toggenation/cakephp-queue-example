@@ -11,6 +11,6 @@ if (!function_exists('pt')) {
      */
     function pt($val)
     {
-        echo print_r($val, true) . PHP_EOL;
+        return print_r($val, true) . PHP_EOL;
     }
 }

@@ -1,53 +1,128 @@
-# CakePHP Application Skeleton
+# CakePHP Queue Example
 
-![Build Status](https://github.com/cakephp/app/actions/workflows/ci.yml/badge.svg?branch=master)
-[![Total Downloads](https://img.shields.io/packagist/dt/cakephp/app.svg?style=flat-square)](https://packagist.org/packages/cakephp/app)
-[![PHPStan](https://img.shields.io/badge/PHPStan-level%207-brightgreen.svg?style=flat-square)](https://github.com/phpstan/phpstan)
+## Features
+- Docker config with 5 containers
+    - MySQL
+    - Nginx
+    - PHP
+        - Dockerfile for CakePHP 4 with Node & Composer
+    - Redis
+    - Mailhog
+- Seeding database with faker
+- Testing Mail System Function with a Command
+- Installation & configuration of Cake/Queue plugin
+    - 2 Queue configurations 
+    - Mailer Action and Command Job queuing 
+- Overriding default form widget templates
 
-A skeleton for creating applications with [CakePHP](https://cakephp.org) 4.x.
+## Getting started
+Clone this repo
 
-The framework source code can be found here: [cakephp/cakephp](https://github.com/cakephp/cakephp).
-
-## Installation
-
-1. Download [Composer](https://getcomposer.org/doc/00-intro.md) or update `composer self-update`.
-2. Run `php composer.phar create-project --prefer-dist cakephp/app [app_name]`.
-
-If Composer is installed globally, run
-
-```bash
-composer create-project --prefer-dist cakephp/app
+Copy dotenv.example to .env
+```
+cp dotenv.example .env
+```
+Build Docker images
+```
+docker-compose build
 ```
 
-In case you want to use a custom app dir name (e.g. `/myapp/`):
-
-```bash
-composer create-project --prefer-dist cakephp/app myapp
+Start Docker Containers
+```
+# start in background
+docker-compose up -d 
+```
+Attach to the PHP container and install PHP dependencies
+```
+composer install
 ```
 
-You can now either use your machine's webserver to view the default home page, or start
-up the built-in webserver with:
+### Edit `app_local.php`
+Mailhog setup
 
-```bash
-bin/cake server -p 8765
+```php
+// config/app_local.php
+    'EmailTransport' => [
+        'default' => [
+            'className' => SmtpTransport::class,
+            'host' => 'mailhog',
+            'port' => 1025,
+            'timeout' => 30,
+            'client' => null,
+            'tls' => false,
+            'url' => env('EMAIL_TRANSPORT_DEFAULT_URL', null),
+        ],
+    ],
+    'Email' => [
+        'default' => [
+            'transport' => 'default',
+            'from' => ['james@toggen.com.au' => 'James McDonald'],
+            //'charset' => 'utf-8',
+            //'headerCharset' => 'utf-8',
+        ],
+    ],
 ```
 
-Then visit `http://localhost:8765` to see the welcome page.
+Add Cake/Queue queue configurations
 
-## Update
+```php
+// config/app_local.php
 
-Since this skeleton is a starting point for your application and various files
-would have been modified as per your needs, there isn't a way to provide
-automated upgrades, so you have to do any updates manually.
+  'Queue' => [
+        'default' => [
+            // A DSN for your configured backend. default: null
+            'url' => 'redis://redis',
 
-## Configuration
+            // The queue that will be used for sending messages. default: default
+            // This can be overriden when queuing or processing messages
+            'queue' => 'default',
 
-Read and edit the environment specific `config/app_local.php` and setup the 
-`'Datasources'` and any other configuration relevant for your application.
-Other environment agnostic settings can be changed in `config/app.php`.
+            // The name of a configured logger, default: null
+            'logger' => 'stdout',
 
-## Layout
+            // The name of an event listener class to associate with the worker
+            'listener' => \App\Listener\WorkerListener::class,
 
-The app skeleton uses [Milligram](https://milligram.io/) (v1.3) minimalist CSS
-framework by default. You can, however, replace it with any other library or
-custom styles.
+            // The amount of time in milliseconds to sleep if no jobs are currently available. default: 10000
+            'receiveTimeout' => 10000,
+        ],
+        'add_user' => [
+            // A DSN for your configured backend. default: null
+            'url' => 'redis://redis',
+
+            // The queue that will be used for sending messages. default: default
+            // This can be overriden when queuing or processing messages
+            'queue' => 'add_user',
+
+            // The name of a configured logger, default: null
+            'logger' => 'stdout',
+
+            // The name of an event listener class to associate with the worker
+            'listener' => \App\Listener\AddUserWorkerListener::class,
+
+            // The amount of time in milliseconds to sleep if no jobs are currently available. default: 10000
+            'receiveTimeout' => 10000,
+        ]
+    ],
+```
+
+MySQL
+
+```php
+// config/app_local.php
+ 'Datasources' => [
+        'default' => [
+            'host' => 'mysql',
+            'username' => 'devtest',
+            'password' => 'devtest',
+            'database' => 'devtest',
+            'url' => env('DATABASE_URL', null),
+        ],
+```
+
+## References
+[https://book.cakephp.org/queue/1/en/index.html](https://book.cakephp.org/queue/1/en/index.html)\
+[https://book.cakephp.org/4/en/core-libraries/email.html](https://book.cakephp.org/4/en/core-libraries/email.html)\
+[https://book.cakephp.org/4/en/views/helpers/form.html](https://book.cakephp.org/4/en/views/helpers/form.html)\
+[https://fakerphp.github.io/](https://fakerphp.github.io/)
+[https://book.cakephp.org/4/en/core-libraries/email.html#sending-emails-without-using-mailer](https://book.cakephp.org/4/en/core-libraries/email.html#sending-emails-without-using-mailer)

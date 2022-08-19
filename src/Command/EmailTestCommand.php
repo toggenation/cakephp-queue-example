@@ -8,7 +8,12 @@ use Cake\Command\Command;
 use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
+use Cake\Core\Configure;
 use Cake\Mailer\Mailer;
+use Cake\Mailer\Message;
+use Cake\Mailer\Transport\SmtpTransport;
+use Cake\Mailer\TransportFactory;
+use Soundasleep\Html2Text;
 
 /**
  * EmailTest command.
@@ -39,10 +44,25 @@ class EmailTestCommand extends Command
      */
     public function execute(Arguments $args, ConsoleIo $io)
     {
-        (new Mailer())->setTo(['test@example.com' => 'Test User Name here'])
-            ->setSubject('Hi this is a test')
-            ->setEmailFormat('html')
-            ->deliver("This is the content");
+        // (new Mailer())->setTo(['test@example.com' => 'Test User Name here'])
+        //     ->setSubject('Hi this is a test')
+        //     ->setEmailFormat('html')
+        //     ->deliver("This is the content");
+
+        $body = '<h1>Heading Test</h1><p>Paragragh Test</p>';
+
+        $message = new \Cake\Mailer\Message();
+
+        $message
+            ->setFrom('admin@cakephp.org')
+            ->setTo('user@foo.com')
+            ->setBodyHtml($body)
+            ->setEmailFormat('both')
+            ->setBodyText(Html2Text::convert($body));
+
+        $transport = (new TransportFactory())->get('default');
+
+        $result = $transport->send($message);
 
         $io->out("Message sent!");
     }
