@@ -16,10 +16,11 @@ class UserFactory
         $fn = $this->faker->firstName();
         $ln = $this->faker->lastName();
         $dn = $this->faker->domainName();
-
+        $fullName = "{$fn} {$ln}";
+        $email = strtolower("{$fn}.{$ln}@{$dn}");
         return [
-            'name' => "{$fn} {$ln}",
-            'email' => strtolower("{$fn}.{$ln}@{$dn}")
+            'full_name' => $fullName,
+            'email' => $email
         ];
     }
 
