@@ -56,7 +56,8 @@ RUN adduser --disabled-password --gecos "" --force-badname --ingroup phpdev phpd
 
 RUN usermod -G 1073 www-data
 
-RUN echo umask 0002 >> /home/phpdev/.profile
+# doesn't work on mounted volume
+RUN echo "umask 0002" >> /home/phpdev/.bashrc
 
 WORKDIR /var/www/html
 
