@@ -41,13 +41,23 @@ RUN docker-php-ext-install exif
 RUN docker-php-ext-install zip
 
 WORKDIR /
+
 COPY composerInstall.sh .
+
 RUN chmod +x composerInstall.sh && ./composerInstall.sh && rm -f composerInstall.sh
+
+RUN apt-get install -y procps
 
 RUN apt-get clean && apt-get autoremove -y && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/src
 
 RUN addgroup --gid 1073 phpdev
+
 RUN adduser --disabled-password --gecos "" --force-badname --ingroup phpdev phpdev
 
 RUN usermod -G 1073 www-data
+
+RUN echo umask 0002 >> /home/phpdev/.profile
+
+WORKDIR /var/www/html
+
 USER phpdev
