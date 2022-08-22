@@ -4,7 +4,6 @@
  * @var \App\View\AppView $this
  * @var \App\Model\Entity\User $user
  */
-
 $this->Html->css('fix', ['block' => true]);
 ?>
 <div class="row">
@@ -20,22 +19,16 @@ $this->Html->css('fix', ['block' => true]);
             <fieldset>
                 <legend><?= __('Notify Users') ?></legend>
                 <?php
-
                 echo $this->Form->control('subject');
-
                 echo $this->Form->control('body');
 
-                $template = [
+                $this->Form->setTemplates([
                     'checkboxWrapper' => '<div class="checkbox fix">{{label}}</div>',
-                ];
-
-                $this->Form->setTemplates($template);
-
+                ]);
                 echo $this->Form->control('users', [
                     'multiple' => 'checkbox',
                     'required' => false
                 ]);
-                // echo $this->Form->control('email');
                 ?>
             </fieldset>
             <?= $this->Form->button(__('Submit')) ?>

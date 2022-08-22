@@ -6,6 +6,7 @@ namespace App\Form;
 
 use Cake\Form\Form;
 use Cake\Form\Schema;
+use Cake\Log\LogTrait;
 use Cake\Validation\Validator;
 
 /**
@@ -13,6 +14,7 @@ use Cake\Validation\Validator;
  */
 class NotifyForm extends Form
 {
+    use LogTrait;
     /**
      * Builds the schema for the modelless form
      *
@@ -21,7 +23,12 @@ class NotifyForm extends Form
      */
     protected function _buildSchema(Schema $schema): Schema
     {
-        return $schema->addFields(['body' => 'text', 'subject' => 'string']);
+        return $schema->addFields([
+            'body' => [
+                'type' => 'text'
+            ],
+            'subject' => ['type' => 'string']
+        ]);
     }
 
     /**
@@ -32,8 +39,7 @@ class NotifyForm extends Form
      */
     public function validationDefault(Validator $validator): Validator
     {
-        return $validator
-            ->notEmptyString('subject')
+        return $validator->notEmptyString('subject')
             ->notEmptyString('body')
             ->notEmptyArray('users');
     }
@@ -46,6 +52,7 @@ class NotifyForm extends Form
      */
     protected function _execute(array $data): bool
     {
+        $this->log("Inside _execute " . print_r($data, true));
         return true;
     }
 }

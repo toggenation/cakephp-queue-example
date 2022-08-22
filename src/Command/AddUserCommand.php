@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 namespace App\Command;
 
+use App\Job\AddUserJob;
 use Cake\Command\Command;
 use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
 use Cake\Queue\QueueManager;
-use App\Job\AddUserJob;
-use App\Factories\UserFactory;
 
 /**
  * AddUser command.
@@ -29,13 +28,9 @@ class AddUserCommand extends Command
         $parser = parent::buildOptionParser($parser);
 
         return $parser->addArguments([
-            'name' => ['required' => false, 'help' => "Enter a user full name e.g. \"James McDonald\""],
-            'email' => ['required' => false, 'help' => "Enter a user email e.g. \"james@toggen.com.au\""],
-        ])->addOption('random', [
-            'help' => "Generate a random user using Faker",
-            'short' => 'r', 'boolean' => true
-        ])
-            ->setEpilog(['', 'Add a user to the database using the add_user queue']);
+            'full_name' => ['required' => true, 'help' => "Enter a user full name e.g. \"James McDonald\""],
+            'email' => ['required' => true, 'help' => "Enter a user email e.g. \"james@toggen.com.au\""],
+        ])->setEpilog("This command enters a record in the users table");
     }
 
     /**
@@ -47,42 +42,9 @@ class AddUserCommand extends Command
      */
     public function execute(Arguments $args, ConsoleIo $io)
     {
-        $this->io = $io;
 
-        if ($args->getOption('random')) {
-            $this->io->info(['', 'Adding a user with Faker data'], 2);
+        [$full_name, $email] = $args->getArguments();
 
-            extract((new UserFactory())->single());
-        } else {
-            $name = $args->getArgument('name');
-
-            $email = $args->getArgument('email');
-
-            if ($name === null || $email === null) {
-                $this->io->info(["", "Enter details or Control C to exit", ""]);
-
-                $name = $this->ask($name, 'Full name e.g. James McDonald');
-
-                $email = $this->ask($email, 'Email address e.g. james@toggen.com.au');
-            }
-        }
-
-        QueueManager::push(
-            AddUserJob::class,
-            compact('email', 'name'),
-            ['config' => 'add_user']
-        );
-    }
-    public function ask($current, $message)
-    {
-        if (!empty($current)) {
-            return $current;
-        }
-
-        do {
-            $result =  $this->io->ask($message);
-        } while (empty($result));
-
-        return $result;
+        QueueManager::push(AddUserJob::class, compact('full_name', 'email'), ['config' => 'add_user']);
     }
 }

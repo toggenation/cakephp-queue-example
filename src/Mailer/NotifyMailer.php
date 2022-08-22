@@ -13,7 +13,6 @@ use Cake\Queue\Mailer\QueueTrait;
 class NotifyMailer extends Mailer
 {
     use QueueTrait;
-
     /**
      * Mailer's name.
      *
@@ -21,21 +20,25 @@ class NotifyMailer extends Mailer
      */
     public static $name = 'Notify';
 
-    public function notify(string $email, string $username)
+    public function notify(string $email, string $fullName, array $data): void
     {
-        $this->setSubject(sprintf("Test email %s %s", $email, $username))
-            ->setViewVars(compact('email', 'username'))
+        $this
+            ->setTo($email)
             ->setEmailFormat('both')
-            ->setTo([$email => $username])
-            ->viewBuilder()->setTemplate('test');
+            ->setViewVars($data)
+            ->setSubject(sprintf('Welcome %s', $fullName));
     }
 
 
-
-    public function failed(string $email, string $username, string $error)
+    public function failed(string $email, string $fullName, string $error): void
     {
-        $this->setSubject(sprintf("Add User Failed for %s - %s - with error %s ", $email, $username, $error))
-            ->setTo(['admin@example.com' => "Admin User"])
-            ->viewBuilder()->setTemplate(null);
+        $this
+            ->setTo($email)
+            ->setSubject(sprintf(
+                'Failed to add %s <%s> - %s',
+                $fullName,
+                $email,
+                $error
+            ))->viewBuilder()->setTemplate(null);
     }
 }

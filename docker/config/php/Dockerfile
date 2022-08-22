@@ -1,5 +1,8 @@
 FROM php:fpm
 
+ARG VERSION=v18.7.0
+ARG USERNAME=phpdev
+
 RUN apt-get update && apt-get install -y \
     libfreetype6-dev \
     libjpeg62-turbo-dev \
@@ -20,7 +23,7 @@ RUN docker-php-ext-install intl pdo pdo_mysql
 RUN cd /usr/local/etc/php/conf.d/ && \
     echo 'memory_limit = 512M' >> /usr/local/etc/php/conf.d/docker-php-ram-limit.ini
 
-ARG VERSION=v16.14.0
+
 
 RUN mkdir /build && apArch=$(arch); \
     case "$apArch" in \
@@ -28,7 +31,7 @@ RUN mkdir /build && apArch=$(arch); \
     aarch64) export DISTRO='linux-arm64' ;;\
     esac;\ 
     cd /build && \
-    wget https://nodejs.org/dist/v16.14.0/node-${VERSION}-${DISTRO}.tar.xz && \
+    wget https://nodejs.org/dist/${VERSION}/node-${VERSION}-${DISTRO}.tar.xz && \
     tar -xvf node-${VERSION}-${DISTRO}.tar.xz --strip-components=1 -C /usr/local
 
 RUN pecl install xdebug \
@@ -41,8 +44,36 @@ RUN docker-php-ext-install exif
 RUN docker-php-ext-install zip
 
 WORKDIR /
+
 COPY composerInstall.sh .
+
 RUN chmod +x composerInstall.sh && ./composerInstall.sh && rm -f composerInstall.sh
+
+RUN apt-get install -y procps
 
 RUN apt-get clean && apt-get autoremove -y && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/src
 
+RUN addgroup --gid 1073 ${USERNAME}
+
+RUN adduser --disabled-password --gecos "" --force-badname --ingroup ${USERNAME} ${USERNAME}
+
+RUN usermod -G 1073 www-data
+
+# doesn't work on mounted volume on MacOS:(
+RUN echo "umask 0002" >> /home/${USERNAME}/.bashrc
+
+WORKDIR /var/www/html
+
+RUN mkdir -p /home/${USERNAME}/.vscode-server/extensions \
+    /home/${USERNAME}/.vscode-server-insiders/extensions \
+    && chown -R ${USERNAME} \
+    /home/${USERNAME}/.vscode-server \
+    /home/${USERNAME}/.vscode-server-insiders
+
+RUN mkdir -p /home/${USERNAME}/.composer/cache/{repo,files} \
+    /home/${USERNAME}/.config/composer \
+    && chown -R ${USERNAME} \
+    /home/${USERNAME}/.composer \
+    /home/${USERNAME}/.config
+
+USER ${USERNAME}

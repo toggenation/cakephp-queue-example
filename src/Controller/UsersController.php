@@ -23,40 +23,44 @@ class UsersController extends AppController
     {
         $form = new NotifyForm();
 
-        if ($this->request->is(['post'])) {
+        if ($this->request->is('post')) {
             $data = $this->request->getData();
 
-            if ($form->validate($data)) {
-                $userIds = $data['users'];
+            $userIds = $data['users'];
 
+            if ($form->execute($data)) {
                 unset($data['users']);
-
-                /**
-                 * @var \App\Mailer\NotifyMailer $mailer
-                 */
-                $mailer = $this->getMailer('Notify');
-
                 foreach ($userIds as $id) {
                     $user = $this->Users->get($id);
 
-                    $mailer->push('notify', [$user->email, $user->name]);
+                    /**
+                     * @var \App\Mailer\NotifyMailer $mailer
+                     */
+                    $mailer = $this->getMailer('Notify');
+
+                    $mailer->push('notify', [$user->email, $user->full_name, $data]);
                 }
-
-                $this->Flash->success(count($userIds) . " emails sent");
+                $this->Flash->success("Sent " . count($userIds) . " emails");
             } else {
-                $errorFieldNames = array_map([new Inflector(), 'humanize'], array_keys($form->getErrors()));
+                $error = "Invalid data in " . Text::toList(
+                    array_map(
+                        [new Inflector(), 'humanize'],
+                        array_keys($form->getErrors())
+                    )
+                ) . ' field';
 
-                $errors = Text::toList($errorFieldNames);
-
-                $this->Flash->error("Check the " . $errors . ' fields');
+                $this->Flash->error($error);
             }
         }
 
-        $users = $this->Users->find('list');
+        $users = $this->Users->find('list', [
+            'keyField' => 'id',
+            'valueField' => 'full_name'
+        ]);
+
 
         $this->set(compact('users', 'form'));
     }
-
     /**
      * Index method
      *

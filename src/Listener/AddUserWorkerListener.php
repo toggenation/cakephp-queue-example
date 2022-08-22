@@ -5,6 +5,7 @@ namespace App\Listener;
 use Cake\Event\Event;
 use Cake\Event\EventListenerInterface;
 use Cake\Log\LogTrait;
+use Cake\Utility\Text;
 use Psr\Log\LogLevel;
 
 class AddUserWorkerListener implements EventListenerInterface
@@ -56,32 +57,33 @@ class AddUserWorkerListener implements EventListenerInterface
 
     public function processorMessageException($message, $exception)
     {
-        // $this->log(__METHOD__);
-        // $this->log($exception->getMessage());
+        $this->log(__METHOD__);
     }
 
     public function processorMessageInvalid($message)
     {
-        // $this->log(__METHOD__);
-    }
-
-    public function processorMessageReject(Event $message)
-    {
-        $this->log("Add failed " . implode(' - ', array_values($message->getData('message')->getArgument())));
-
         $this->log(__METHOD__);
     }
 
-    public function processorMessageSuccess($message)
+    public function processorMessageReject($message)
     {
+        $this->log(__METHOD__);
+    }
 
-        $this->log(__METHOD__, LogLevel::INFO);
+    public function processorMessageSuccess(Event $message)
+    {
         /**
          * @var \Cake\Queue\Job\Message $cakeMessage
          */
         $cakeMessage = $message->getData('message');
-        $this->log('Added ' . implode(', ', $cakeMessage->getArgument()), LogLevel::NOTICE);
-        // $this->log($cakeMessage->getArgument()['args'][0], LogLevel::INFO);
+
+        $this->log(print_r($cakeMessage->getArgument(), true));
+
+        $email = $cakeMessage->getArgument()['email'];
+
+        $fullName = $cakeMessage->getArgument()['full_name'];
+
+        $this->log("Success add_user: {$fullName} <{$email}>", LogLevel::INFO);
     }
 
     public function processorMessageFailure($message)

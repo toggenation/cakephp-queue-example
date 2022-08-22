@@ -4,14 +4,12 @@ declare(strict_types=1);
 
 namespace App\Command;
 
+use App\Mailer\NotifyMailer;
 use Cake\Command\Command;
 use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
-use Cake\Core\Configure;
-use Cake\Mailer\Mailer;
 use Cake\Mailer\Message;
-use Cake\Mailer\Transport\SmtpTransport;
 use Cake\Mailer\TransportFactory;
 use Soundasleep\Html2Text;
 
@@ -20,7 +18,6 @@ use Soundasleep\Html2Text;
  */
 class EmailTestCommand extends Command
 {
-
     /**
      * Hook method for defining this command's option parser.
      *
@@ -44,25 +41,27 @@ class EmailTestCommand extends Command
      */
     public function execute(Arguments $args, ConsoleIo $io)
     {
-        // (new Mailer())->setTo(['test@example.com' => 'Test User Name here'])
-        //     ->setSubject('Hi this is a test')
-        //     ->setEmailFormat('html')
-        //     ->deliver("This is the content");
+        $mailer = new NotifyMailer();
 
-        $body = '<h1>Heading Test</h1><p>Paragragh Test</p>';
+        // $mailer->send('notify', ["james@toggen.com.au", "James McDonald", ['subject' => "Test Email", 'body' => "test body"]]);
+        $mailer->send('failed', [
+            "james@toggen.com.au", "James McDonald", "Error Message Here"
+        ]);
 
-        $message = new \Cake\Mailer\Message();
+        // $message = new Message();
 
-        $message
-            ->setFrom('admin@cakephp.org')
-            ->setTo('user@foo.com')
-            ->setBodyHtml($body)
-            ->setEmailFormat('both')
-            ->setBodyText(Html2Text::convert($body));
+        // $bodyHtml = '<h1>Test heading</h1><p>Test paragraph</p>';
 
-        $transport = (new TransportFactory())->get('default');
+        // $message->setFrom("admin@example.com")
+        //     ->setSubject("A test message using Message and Transport instead of Mailer class")
+        //     ->setTo('user@example.com')
+        //     ->setBodyHtml($bodyHtml)
+        //     ->setBodyText(Html2Text::convert($bodyHtml))
+        //     ->setEmailFormat('both');
 
-        $result = $transport->send($message);
+        // $transport = (new TransportFactory())->get('default');
+
+        // $result = $transport->send($message);
 
         $io->out("Message sent!");
     }

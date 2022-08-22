@@ -39,7 +39,7 @@ class UsersTable extends Table
         parent::initialize($config);
 
         $this->setTable('users');
-        $this->setDisplayField('name');
+        $this->setDisplayField('full_name');
         $this->setPrimaryKey('id');
     }
 
@@ -52,10 +52,10 @@ class UsersTable extends Table
     public function validationDefault(Validator $validator): Validator
     {
         $validator
-            ->scalar('name')
-            ->maxLength('name', 255)
-            ->requirePresence('name', 'create')
-            ->notEmptyString('name');
+            ->scalar('full_name')
+            ->maxLength('full_name', 255)
+            ->requirePresence('full_name', 'create')
+            ->notEmptyString('full_name');
 
         $validator
             ->email('email')
@@ -74,10 +74,7 @@ class UsersTable extends Table
      */
     public function buildRules(RulesChecker $rules): RulesChecker
     {
-        $rules->add($rules->isUnique(['email']), [
-            'message' => "The email field must be unique",
-            'errorField' => 'email'
-        ]);
+        $rules->add($rules->isUnique(['email']), ['errorField' => 'email']);
 
         return $rules;
     }
