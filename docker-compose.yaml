@@ -7,7 +7,7 @@ services:
     ports:
       - "${FORWARD_REDIS_PORT:-6379}:6379"
     networks:
-      - queue-in-cake-net
+      - cakephp4-queue-net
   nginx:
     image: nginx:latest
     ports:
@@ -19,7 +19,7 @@ services:
       - ./docker/config/nginx/site.conf:/etc/nginx/conf.d/default.conf
       # so we can cache our github tokens
     networks:
-      - queue-in-cake-net
+      - cakephp4-queue-net
     links:
       - php
       - mailhog
@@ -28,6 +28,9 @@ services:
     restart: unless-stopped
   php:
     # image: php:fpm
+    environment:
+      # XDEBUG_MODE: "debug,develop"
+      XDEBUG_MODE: "off"
     restart: unless-stopped
     build:
       context: ./docker/config/php/
@@ -35,13 +38,13 @@ services:
     extra_hosts:
       - 'host.docker.internal:host-gateway'
     networks:
-      - queue-in-cake-net
+      - cakephp4-queue-net
     volumes:
       - .:/var/www/html
       - ./docker/config/php/php.ini:/usr/local/etc/php/php.ini
-      - '~/.composer/docker-cache/:/root/.composer:cached'
-      - '~/.config/composer/:/root/.config/composer:cached'
-      - vscode-extensions:/root/.vscode-server/extensions
+      - '~/.composer/docker-cache/:/home/phpdev/.composer:cached'
+      - '~/.config/composer/:/home/phpdev/.config/composer:cached'
+      - vscode-extensions:/home/phpdev/.vscode-server/extensions
     links:
       - mysql
   mysql:
@@ -56,13 +59,13 @@ services:
       MYSQL_PASSWORD: '${DB_PASSWORD}'
       MYSQL_ROOT_HOST: '%'
     volumes:
-      - 'queue-in-cake:/var/lib/mysql'
+      - 'cakephp4-queue:/var/lib/mysql'
       # delegated'
       # /etc/mysql/conf.d for x64
       # for arm image
       # - './docker/config/mysql/my.cnf:/etc/my.cnf'
     networks:
-      - queue-in-cake-net
+      - cakephp4-queue-net
     healthcheck:
       test: [ "CMD", "mysqladmin", "ping", "-p${DB_PASSWORD}" ]
       retries: 3
@@ -78,12 +81,12 @@ services:
       - '${FORWARD_MAILHOG_PORT:-1025}:1025'
       - '${FORWARD_MAILHOG_DASHBOARD_PORT:-8025}:8025'
     networks:
-      - queue-in-cake-net
+      - cakephp4-queue-net
 networks:
-  queue-in-cake-net:
+  cakephp4-queue-net:
     driver: bridge
 volumes:
-  queue-in-cake:
+  cakephp4-queue:
     driver: local
   vscode-extensions:
     driver: local
